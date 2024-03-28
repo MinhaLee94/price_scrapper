@@ -13,6 +13,8 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+org.eclipse.core.resources.prefs
+org.eclipse.jdt.core.prefs
 
 # External tool builders
 .externalToolBuilders/
@@ -119,7 +121,8 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-org.eclipse.core.resources.prefs
-org.eclipse.jdt.core.prefs
+# secure property value
+*.properties
+
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,eclipse,java
