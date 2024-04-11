@@ -55,7 +55,9 @@ public class WebDriverTask implements Runnable {
 				// status OFF SITE
 			}
 		} finally {
-			driver.close();
+			if(driver != null) {
+				driver.quit();
+			}
 		}
 	}
 }

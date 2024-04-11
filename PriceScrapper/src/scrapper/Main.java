@@ -9,28 +9,57 @@ import java.util.concurrent.Executors;
 import org.openqa.selenium.By;
 
 import scrapper.WebDriverTask;
+import db.SellThruDAO;
 
 public class Main {
+	private final static String[] vendorList = {"Staples", "Target Plus"};
+	private static ArrayList<String> staplesSKU = null;
+	private static ArrayList<String> targetPlusSKU = null;
+	
+	private static DatabaseConnection db = new DatabaseConnection();
+	private static SellThruDAO dao = new SellThruDAO();
+	
+	public static void initSKUListForVendors() {
+		for (String vendor : vendorList) {
+			switch(vendor.toUpperCase()) {
+				case "STAPLES":
+					staplesSKU = dao.getSKUList(vendor);
+					break;
+				case "TARGET PLUS":
+					targetPlusSKU = dao.getSKUList(vendor);
+					break;
+			}
+		}
+	}
+	
 	public static void main(String[] args) {
-		DatabaseConnection db = new DatabaseConnection();
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+		initSKUListForVendors();
 		
-		ExecutorService executor = Executors.newFixedThreadPool(4);
-		
-		// string, by , by, string object
 		ArrayList<WebDriverTask> tasks = new ArrayList<WebDriverTask>() {{
 			add(new WebDriverTask(
 					"STAPLES", 
 					"https://www.staples.com/24516278/directory_24516278", 
-					new By.ByClassName(".price-info__final_price_sku"), 
+					new By.ByCssSelector(".price-info__final_price_sku"), 
 					new By.ByXPath("//*[@id='ONE_TIME_PURCHASE']/div/div/div/div/div/div/div[2]/div"), 
 					"This item is out of stock"));
+			add(new WebDriverTask(
+					"TARGETPLUS",
+					"https://www.target.com/s?searchTerm=85405483",
+					new By.ByCssSelector(".h-padding-r-tiny"),
+					new By.ByCssSelector("#addToCartButtonOrTextIdFor85405483"),
+					"SOLD OUT"));
 		}};
 		
-		for(WebDriverTask task : tasks) {
-			executor.submit(task);
+		try {
+			
+			
+			for(WebDriverTask task : tasks) {
+				executor.submit(task);
+			}
+		} finally {
+			executor.shutdown();
 		}
-		
-		executor.shutdown();
 		
 		//String result = wd.scrapPrice("https://www.staples.com/24516278/directory_24516278");
 		return;
