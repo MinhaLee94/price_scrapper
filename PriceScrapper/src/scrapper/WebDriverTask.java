@@ -1,26 +1,24 @@
 package scrapper;
 
+import java.util.ArrayList;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+
+import db.SellThruDAO;
 
 public class WebDriverTask implements Runnable {
 	private final String WEB_DRIVER_ID = "webdriver.chrome.driver";
 	private final String WEB_DRIVER_PATH = "./chromedriver.exe";
 	
 	private String vendor;
-	private String url;
-	private By priceSelector;
-	private By outOfStockSelector;
-	private String outOfStockText;
+	private ArrayList<String> skuList;
 	
-	public WebDriverTask(String vendor, String url, By priceSelector, By outOfStockSelector, String outOfStockText) {
+	public WebDriverTask(String vendor, ArrayList<String> skuList) {
 		this.vendor = vendor;
-		this.url = url;
-		this.priceSelector = priceSelector;
-		this.outOfStockSelector = outOfStockSelector;
-		this.outOfStockText = outOfStockText;
+		this.skuList = skuList;
 	}
 	
 	private ChromeOptions configChromeOptions() {
@@ -30,29 +28,38 @@ public class WebDriverTask implements Runnable {
 		
 		return options;
 	}
+	
 
 	@Override
 	public void run() {
 		System.setProperty(WEB_DRIVER_ID, WEB_DRIVER_PATH);
 		ChromeOptions options = configChromeOptions();
 		ChromeDriver driver = new ChromeDriver(options);
+		SellThruDAO dao = new SellThruDAO();
 		
 		try {
-			driver.get(url);
-			WebElement curPrice = driver.findElement(priceSelector);
-			WebElement outOfStockSign = driver.findElement(outOfStockSelector);
+			int vendorIdx = dao.getVendorIdx(vendor);
 			
-			if(curPrice == null) {
-				if(outOfStockSign != null && outOfStockSign.getText().equalsIgnoreCase(outOfStockText)) {
-					// curPrice
-					// status OUT OF STOCK
+			for(String resellerSku : skuList) {
+				VendorScrapper vendorScrapper = new VendorScrapper(vendor, resellerSku);
+				driver.get(vendorScrapper.url);
+				WebElement curPrice = driver.findElement(vendorScrapper.priceSelector);
+				WebElement outOfStockSign = driver.findElement(vendorScrapper.outOfStockSelector);
+				
+				// pull product info
+				
+				if(curPrice != null) {
+					if(outOfStockSign != null && outOfStockSign.getText().equalsIgnoreCase(vendorScrapper.outOfStockText)) {
+						// update curPrice
+						// status OUT OF STOCK
+					} else {
+						// curPrice
+						// status ON SITE
+					}
 				} else {
-					// curPrice
-					// status ON SITE
+					// keep RP
+					// status OFF SITE
 				}
-			} else {
-				// keep RP
-				// status OFF SITE
 			}
 		} finally {
 			if(driver != null) {
