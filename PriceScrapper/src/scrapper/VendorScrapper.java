@@ -22,6 +22,24 @@ public class VendorScrapper {
 				this.priceSelector = new By.ByCssSelector(".h-padding-r-tiny");
 				this.outOfStockSelector = new By.ByCssSelector("#addToCartButtonOrTextIdFor" + resellerSku);
 				break;
+			case "NEWEGG":
+				this.url = "https://www.newegg.com/p/" + resellerSku + "?item=" + resellerSku;
+				this.outOfStockText = "OUT OF STOCK";
+				this.priceSelector = new By.ByCssSelector(".product-buy-box .price-current");
+				this.outOfStockSelector = new By.ByCssSelector(".product-buy-box .btn-message");
+				break;
+			case "OFFICE DEPOT":
+				this.url = "https://www.officedepot.com/catalog/catalogSku.do?id=" + resellerSku;
+				this.outOfStockText = "OUT OF STOCK";
+				this.priceSelector = new By.ByCssSelector(".od-graphql-price-big-price");
+				this.outOfStockSelector = new By.ByCssSelector(".od-fulfillment-option-in-stock-message-text-oos");
+				break;
+			case "BESTBUY":
+				this.url = "https://www.bestbuy.com/site/searchpage.jsp?st=" + resellerSku;
+				this.outOfStockText = "SOLD OUT";
+				this.priceSelector = new By.ByCssSelector(".pricing-price .priceView-customer-price > span:first-child");
+				this.outOfStockSelector = new By.ByCssSelector(".fulfillment-fulfillment-summary>div>div>div:nth-child(2)>div");
+				break;
 		}
 	}
 }
