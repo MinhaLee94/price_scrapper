@@ -7,7 +7,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
+import db.ProductInfo;
 import db.SellThruDAO;
+import utility.Utils;
 
 public class WebDriverTask implements Runnable {
 	private final String WEB_DRIVER_ID = "webdriver.chrome.driver";
@@ -46,19 +48,25 @@ public class WebDriverTask implements Runnable {
 				WebElement curPrice = driver.findElement(vendorScrapper.priceSelector);
 				WebElement outOfStockSign = driver.findElement(vendorScrapper.outOfStockSelector);
 				
-				// pull product info
+				int curProductIdx = dao.getProductIdx(vendorIdx, resellerSku);
+				ProductInfo curProduct = dao.getProductInfo(curProductIdx);
+				double realPrice = Utils.formatPrice(curPrice.getText());
 				
 				if(curPrice != null) {
 					if(outOfStockSign != null && outOfStockSign.getText().equalsIgnoreCase(vendorScrapper.outOfStockText)) {
-						// update curPrice
+						// update curPrice -
 						// status OUT OF STOCK
+						dao.updateProductStatus(curProductIdx, "OUT OF STOCK");
 					} else {
 						// curPrice
 						// status ON SITE
+						dao.updateProductStatus(curProductIdx, "ON SITE");
 					}
+					dao.updateProductPrice(curProductIdx, realPrice);
 				} else {
 					// keep RP
 					// status OFF SITE
+					dao.updateProductStatus(curProductIdx, "OFF SITE");
 				}
 			}
 		} finally {
